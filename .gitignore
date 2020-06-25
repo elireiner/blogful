@@ -1,0 +1,4 @@
+node_modules
+.env
+# winston creates files ending in .log that we don't want pushed to GitHub
+*.log

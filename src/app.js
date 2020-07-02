@@ -6,7 +6,8 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 //winston is a logger
 const winston = require('winston');
-const ArticlesService = require('./articles-service')
+const articlesRouter = require('./articles/articles-router')
+
 
 
 const app = express()
@@ -16,7 +17,6 @@ const morganOption = (NODE_ENV === 'production')
     : 'dev';
 
 app.use(morgan(morganOption))
-app.use(express.json())
 app.use(helmet())
 app.use(cors())
 
@@ -49,25 +49,8 @@ app.use(function validateBearerToken(req, res, next) {
   next()
 }) 
 */
-app.get('/articles', (req, res, next) => {
-    const knexInstance = req.app.get('db');
-    ArticlesService.getAllArticles(knexInstance)
-        .then(articles => {
-            res.json(articles)
-        })
-        .catch(next)
-})
 
-app.get('/articles/:article_id', (req, res, next) => {
-
-    const knexInstance = req.app.get('db');
-    ArticlesService.getById(knexInstance, req.params.article_id)
-        .then(article => {
-            res.json(article)
-        })
-        .catch(next)
-
-})
+app.use('/api/articles', articlesRouter)
 
 app.get('/', (req, res) => {
     res.send('Hello, world!')

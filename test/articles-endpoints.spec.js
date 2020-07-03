@@ -194,8 +194,8 @@ describe('Articles Endpoints', function () {
             it('returns 404', () => {
                 const nonExistentId = 2
                 return supertest(app)
-                .delete(`/api/articles/${nonExistentId}`)
-                .expect(404)
+                    .delete(`/api/articles/${nonExistentId}`)
+                    .expect(404)
             })
         })
 
@@ -220,5 +220,92 @@ describe('Articles Endpoints', function () {
                     )
             })
         })
+    })
+
+    describe.only('PATCH /api/article/:article_id', () => {
+        context('Given no articles', () => {
+            it('responds with 404', () => {
+                const articleId = 1234
+                return supertest(app)
+                    .patch(`/api/articles/${articleId}`)
+                    .expect(404, { error: { message: `Article does not exist` } })
+            })
+        })
+
+        context('Given there are articles in the db', () => {
+
+            const testArticles = makeArticlesArray();
+
+            beforeEach(`insert articles`, () => {
+                return db
+                    .into('blogful_articles')
+                    .insert(testArticles)
+            })
+
+            it('returns 204 and updates the article', () => {
+                const articleToUpdate = 2
+                const updateArticle = {
+                    title: 'updated article title',
+                    style: 'Interview',
+                    content: 'updated article content',
+                }
+
+                const expectedArticle = {
+                    ...testArticles[articleToUpdate - 1],
+                    ...updateArticle
+                }
+
+                return supertest(app)
+                    .patch(`/api/articles/${articleToUpdate}`)
+                    .send(updateArticle)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get(`/api/articles/${articleToUpdate}`)
+                            .expect(expectedArticle)
+                    )
+            })
+
+            it('responds with 404 when no required field is present', () => {
+                const idToUpdate = 2
+                const testArticle = {
+                    nonRequiredField: 'nothing and nothing'
+                }
+
+                return supertest(app)
+                    .patch(`/api/articles/${idToUpdate}`)
+                    .send(testArticle)
+                    .expect(400, {
+                        error: { message: `Request body must contain either 'title', 'style' or 'content'` }
+                    })
+            })
+
+            it('Only updates required fields', () => {
+                const idToUpdate = 2
+                const updateArticle = {
+                    title: 'updated article title'
+                }
+
+                const expectArticle = {
+                    ...testArticles[idToUpdate - 1],
+                    ...updateArticle
+                }
+
+                return supertest(app)
+                    .patch(`/api/articles/${idToUpdate}`)
+                    .send({
+                        ...updateArticle,
+                        part: 'to ignore'
+                    })
+                    .expect(204)
+                    .then(res => 
+                        supertest(app)
+                        .get(`/api/articles/${idToUpdate}`)
+                        .expect(200, expectArticle)
+                    )
+            })
+        })
+
+
     })
 })

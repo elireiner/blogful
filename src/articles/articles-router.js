@@ -60,7 +60,7 @@ articlesRouter
         )
             .then(article => {
                 if (!article) {
-                 return    res.status(404).json({
+                    return res.status(404).json({
                         error: { message: `Article does not exist` }
                     })
                 }
@@ -77,15 +77,38 @@ articlesRouter
             title: xss(res.article.title), // sanitize title
             content: xss(res.article.content), // sanitize content
             date_published: res.article.date_published,
-         })
-    })
-    .delete ((req, res, next) => {
-    ArticlesService.deleteArticle(req.app.get('db'),
-        req.params.article_id)
-        .then(() => {
-            res.status(204).end()
         })
-        .catch(next)
-})
+    })
+    .delete((req, res, next) => {
+        ArticlesService.deleteArticle(req.app.get('db'),
+            req.params.article_id)
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const { title, content, style } = req.body;
+        const articleToUpdate = { title, content, style }
+
+        const numberOfValues = Object.values(articleToUpdate).filter(Boolean).length
+        if (numberOfValues === 0) {
+            return res.status(400).json({
+                error: {message: `Request body must contain either 'title', 'style' or 'content'`}
+            })
+        }
+        
+        ArticlesService.updateArticle(
+            req.app.get('db'),
+            req.params.article_id,
+            articleToUpdate
+        )
+
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+
+            .catch(next)
+    })
 
 module.exports = articlesRouter

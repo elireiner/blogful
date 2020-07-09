@@ -266,7 +266,7 @@ describe('Articles Endpoints', function () {
                     )
             })
 
-            it('responds with 404 when no required field is present', () => {
+            it('responds with 400  when no required field is present', () => {
                 const idToUpdate = 2
                 const testArticle = {
                     nonRequiredField: 'nothing and nothing'

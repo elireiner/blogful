@@ -7,6 +7,8 @@ const { NODE_ENV } = require('./config')
 //winston is a logger
 const winston = require('winston');
 const articlesRouter = require('./articles/articles-router')
+const usersRouter = require('./users/users-router')
+const commentsRouter = require('./comments/comments-router')
 
 
 
@@ -52,9 +54,9 @@ app.use(function validateBearerToken(req, res, next) {
 
 app.use('/api/articles', articlesRouter)
 
-app.get('/', (req, res) => {
-    res.send('Hello, world!')
-})
+app.use('/api/users', usersRouter)
+
+app.use('/api/comments', commentsRouter)
 
 app.use(function errorHandler(error, req, res, next) {
     let response

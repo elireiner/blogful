@@ -11,7 +11,8 @@ let sanitize = article => ({
     title: xss(article.title),
     style: article.style,
     content: xss(article.content),
-    date_published: article.date_published
+    date_published: article.date_published,
+    author: article.author,
 })
 
 articlesRouter
@@ -25,7 +26,7 @@ articlesRouter
             .catch(next)
     })
     .post(jsonParser, (req, res, next) => {
-        const { title, style, content } = req.body;
+        const { title, style, content, author } = req.body;
         const newArticle = { title, style, content }
 
         for (const [key, value] of Object.entries(newArticle)) {
@@ -35,7 +36,8 @@ articlesRouter
                 })
             }
         }
-
+        
+        newArticle.author = author
         ArticlesService.insertArticle(
             req.app.get('db'),
             newArticle
@@ -77,6 +79,7 @@ articlesRouter
             title: xss(res.article.title), // sanitize title
             content: xss(res.article.content), // sanitize content
             date_published: res.article.date_published,
+            author: res.article.author
         })
     })
     .delete((req, res, next) => {

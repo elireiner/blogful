@@ -13,6 +13,9 @@
     "test": "mocha --require test/setup.js"
   },
   "keywords": [],
+  "engines": {
+    "node": "12.13.1"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {

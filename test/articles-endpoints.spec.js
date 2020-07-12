@@ -144,7 +144,7 @@ describe('Articles Endpoints', function () {
 
     })
 
-    describe.only('POST /api/articles', () => {
+    describe('POST /api/articles', () => {
         const testUsers = makeUsersArray();
         beforeEach('insert users', () => {
           return db
